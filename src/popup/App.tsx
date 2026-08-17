@@ -17,13 +17,11 @@ export default function PopupApp() {
       }
       setTabId(activeTab.id);
 
-      // Try sending to content script first
       chrome.tabs.sendMessage(activeTab.id, { type: 'GET_NOTES_FOR_POPUP' }, (response) => {
         if (chrome.runtime.lastError || !response) {
-          // Content script not loaded - try background
           chrome.runtime.sendMessage({ type: 'GET_NOTES_FOR_POPUP' }, (bgResponse) => {
             if (chrome.runtime.lastError || !bgResponse) {
-              setError('TabNote is not active on this page. Navigate to a regular webpage and try again.');
+              setError('WebNote is not active on this page. Navigate to a regular webpage and try again.');
               setLoading(false);
               return;
             }
@@ -41,7 +39,6 @@ export default function PopupApp() {
   const handleCreateNote = () => {
     if (tabId) {
       chrome.tabs.sendMessage(tabId, { type: 'CREATE_NOTE_COMMAND', tabId });
-      // Refresh after a short delay to let the note be created
       setTimeout(() => {
         chrome.tabs.sendMessage(tabId, { type: 'GET_NOTES_FOR_POPUP' }, (response) => {
           if (response) {
@@ -60,9 +57,7 @@ export default function PopupApp() {
 
   const handleDeleteNote = (noteId: string) => {
     if (tabId) {
-      // Delete via content script (which persists to storage)
       chrome.tabs.sendMessage(tabId, { type: 'DELETE_NOTE', payload: { noteId } }, () => {
-        // Also try background in case content script isn't available
         if (chrome.runtime.lastError) {
           chrome.runtime.sendMessage({ type: 'DELETE_NOTE', payload: { noteId }, tabId });
         }
@@ -73,20 +68,18 @@ export default function PopupApp() {
 
   return (
     <div style={{ padding: 16 }}>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 24, height: 24, background: '#fff9b1', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
-            T
+            W
           </div>
-          <span style={{ fontWeight: 600, fontSize: 15, color: '#333' }}>TabNote</span>
+          <span style={{ fontWeight: 600, fontSize: 15, color: '#333' }}>WebNote</span>
         </div>
         <span style={{ fontSize: 12, color: '#888' }}>
           {notes.length} note{notes.length !== 1 ? 's' : ''}
         </span>
       </div>
 
-      {/* Note list */}
       <div style={{ maxHeight: 280, overflowY: 'auto' }}>
         {loading && (
           <div style={{ textAlign: 'center', padding: 20, color: '#999', fontSize: 13 }}>
@@ -102,7 +95,7 @@ export default function PopupApp() {
 
         {!loading && !error && notes.length === 0 && (
           <div style={{ textAlign: 'center', padding: 20, color: '#999', fontSize: 13 }}>
-            No notes on this tab yet.
+            No notes on this page yet.
           </div>
         )}
 
@@ -144,7 +137,6 @@ export default function PopupApp() {
         ))}
       </div>
 
-      {/* Create button */}
       <button
         onClick={handleCreateNote}
         style={{

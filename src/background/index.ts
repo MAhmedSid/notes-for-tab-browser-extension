@@ -70,4 +70,4 @@ chrome.commands.onCommand.addListener((command) => {
 // Notes are keyed by URL and persist across browser restarts.
 // chrome.tabs.onRemoved is intentionally not used for cleanup.
 
-console.log('TabNote background service worker loaded');
+console.log('WebNote background service worker loaded');

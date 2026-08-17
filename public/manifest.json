@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "TabNote",
-  "description": "Tab-specific sticky notes and context workspace",
+  "name": "WebNote",
+  "description": "Webpage specific sticky notes and context workspace",
   "version": "1.0.0",
   "permissions": ["storage", "tabs", "activeTab", "commands"],
   "background": {
@@ -29,7 +29,7 @@
         "default": "Alt+N",
         "mac": "Alt+N"
       },
-      "description": "Create a new note on the current tab"
+      "description": "Create a new note on this webpage"
     }
   },
   "icons": {

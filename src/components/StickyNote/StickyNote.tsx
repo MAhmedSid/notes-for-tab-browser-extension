@@ -20,7 +20,7 @@ export default function StickyNote({ note }: StickyNoteProps) {
   // --- Drag ---
   const handleDragStart = useCallback(
     (e: React.MouseEvent) => {
-      if ((e.target as HTMLElement).closest('.tabnote-btn, .tabnote-color-btn, .tabnote-color-swatch, .tabnote-editor')) {
+      if ((e.target as HTMLElement).closest('.webnote-btn, .webnote-color-btn, .webnote-color-swatch, .webnote-editor')) {
         return;
       }
       e.preventDefault();
@@ -107,25 +107,13 @@ export default function StickyNote({ note }: StickyNoteProps) {
     [note.id, updateNote]
   );
 
-  // Close color picker on outside click
-  useEffect(() => {
-    if (!showColorPicker) return;
-    const handler = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest('.tabnote-color-picker, .tabnote-color-btn')) {
-        setShowColorPicker(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showColorPicker]);
-
   const bgColor = NOTE_COLOR_MAP[note.color];
 
   if (note.collapsed) {
     return (
       <div
         ref={noteRef}
-        className="tabnote-note"
+        className="webnote-note"
         style={{
           left: note.x,
           top: note.y,
@@ -142,7 +130,7 @@ export default function StickyNote({ note }: StickyNoteProps) {
           updateNote(note.id, { collapsed: false });
         }}
       >
-        <div className="tabnote-collapsed-indicator" style={{ height: '100%', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>
+        <div className="webnote-collapsed-indicator" style={{ height: '100%', display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>
           {note.content.slice(0, 20) || '(empty)'}
         </div>
       </div>
@@ -152,7 +140,7 @@ export default function StickyNote({ note }: StickyNoteProps) {
   return (
     <div
       ref={noteRef}
-      className={`tabnote-note ${focused ? 'focused' : ''}`}
+      className={`webnote-note ${focused ? 'focused' : ''}`}
       style={{
         left: note.x,
         top: note.y,
@@ -165,18 +153,18 @@ export default function StickyNote({ note }: StickyNoteProps) {
     >
       {/* Header */}
       <div
-        className="tabnote-header"
+        className="webnote-header"
         onMouseDown={handleDragStart}
         style={{ position: 'relative' }}
       >
-        <div className="tabnote-header-left">
-          <div className="tabnote-color-btn" style={{ backgroundColor: bgColor }} onClick={toggleColorPicker} />
+        <div className="webnote-header-left">
+          <div className="webnote-color-btn" style={{ backgroundColor: bgColor }} onClick={toggleColorPicker} />
           {showColorPicker && (
-            <div className="tabnote-color-picker visible">
+            <div className="webnote-color-picker visible">
               {NOTE_COLORS.map((c) => (
                 <button
                   key={c}
-                  className={`tabnote-color-swatch ${c === note.color ? 'active' : ''}`}
+                  className={`webnote-color-swatch ${c === note.color ? 'active' : ''}`}
                   style={{ backgroundColor: NOTE_COLOR_MAP[c] }}
                   onClick={(e) => handleColorSelect(c, e)}
                   title={c}
@@ -185,16 +173,16 @@ export default function StickyNote({ note }: StickyNoteProps) {
             </div>
           )}
         </div>
-        <div className="tabnote-header-right">
+        <div className="webnote-header-right">
           <button
-            className="tabnote-btn"
+            className="webnote-btn"
             onClick={(e) => { e.stopPropagation(); updateNote(note.id, { collapsed: true }); }}
             title="Collapse"
           >
             &#8722;
           </button>
           <button
-            className="tabnote-btn delete"
+            className="webnote-btn delete"
             onClick={(e) => { e.stopPropagation(); deleteNote(note.id); }}
             title="Delete"
           >
@@ -205,9 +193,9 @@ export default function StickyNote({ note }: StickyNoteProps) {
 
       {/* Body */}
       {!note.collapsed && (
-        <div className="tabnote-body">
+        <div className="webnote-body">
           <textarea
-            className="tabnote-editor"
+            className="webnote-editor"
             value={note.content}
             placeholder="Type a note..."
             onKeyDown={handleKeyDown}
@@ -220,7 +208,7 @@ export default function StickyNote({ note }: StickyNoteProps) {
 
       {/* Resize handle */}
       <div
-        className="tabnote-resize-handle"
+        className="webnote-resize-handle"
         onMouseDown={handleResizeStart}
       />
     </div>

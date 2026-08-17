@@ -2,36 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import StickyNote from '../StickyNote/StickyNote';
 
+interface TabMeta {
+  tabId: number;
+  index: number;
+  windowId: number;
+}
+
 export default function WorkspaceApp() {
   const { notes, loaded, initWorkspace, createNote, focusNote } = useWorkspaceStore();
-  const [tabId, setTabId] = useState<number | null>(null);
+  const [tabMeta, setTabMeta] = useState<TabMeta | null>(null);
   const [showHint, setShowHint] = useState(false);
 
-  // Get tab ID from content script
+  // Get tab metadata from content script
   useEffect(() => {
     const handler = (e: CustomEvent) => {
-      setTabId(e.detail.tabId);
+      setTabMeta(e.detail);
     };
-    window.addEventListener('tabnote-tab-id', handler as EventListener);
-    window.dispatchEvent(new CustomEvent('tabnote-get-tab-id'));
+    window.addEventListener('webnote-tab-meta', handler as EventListener);
+    window.dispatchEvent(new CustomEvent('webnote-get-tab-meta'));
 
-    return () => window.removeEventListener('tabnote-tab-id', handler as EventListener);
+    return () => window.removeEventListener('webnote-tab-meta', handler as EventListener);
   }, []);
 
-  // Initialize workspace when tab ID is known — URL is the stable identity
+  // Initialize workspace when tab metadata is known
   useEffect(() => {
-    if (tabId !== null) {
-      initWorkspace(tabId, window.location.href);
+    if (tabMeta) {
+      initWorkspace(tabMeta.tabId, window.location.href);
     }
-  }, [tabId, initWorkspace]);
+  }, [tabMeta, initWorkspace]);
 
   // Listen for create-note commands
   useEffect(() => {
-    const handler = () => {
-      createNote();
-    };
-    window.addEventListener('tabnote-create-note', handler as EventListener);
-    return () => window.removeEventListener('tabnote-create-note', handler as EventListener);
+    const handler = () => createNote();
+    window.addEventListener('webnote-create-note', handler as EventListener);
+    return () => window.removeEventListener('webnote-create-note', handler as EventListener);
   }, [createNote]);
 
   // Show hint briefly when notes are empty
@@ -44,10 +48,10 @@ export default function WorkspaceApp() {
     setShowHint(false);
   }, [loaded, notes.length]);
 
-  // Expose workspace actions to the global scope for the content script
+  // Expose workspace actions to global scope
   useEffect(() => {
     const w = window as unknown as Record<string, unknown>;
-    w.__tabnote = {
+    w.__webnote = {
       createNote: () => createNote(),
       focusNote: (noteId: string) => focusNote(noteId),
     };
@@ -56,11 +60,11 @@ export default function WorkspaceApp() {
   if (!loaded) return null;
 
   return (
-    <div className="tabnote-workspace">
+    <div className="webnote-workspace">
       {notes.map((note) => (
         <StickyNote key={note.id} note={note} />
       ))}
-      <div className={`tabnote-create-hint ${showHint ? 'visible' : ''}`}>
+      <div className={`webnote-create-hint ${showHint ? 'visible' : ''}`}>
         Press Alt+N to create a note
       </div>
     </div>
